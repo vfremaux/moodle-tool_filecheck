@@ -25,14 +25,23 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// settings default init
+$hasconfig = false;
+$hassiteconfig = false;
 if (is_dir($CFG->dirroot.'/local/adminsettings')) {
     // Integration driven code 
-    require_once($CFG->dirroot.'/local/adminsettings/lib.php');
-    list($hasconfig, $hassiteconfig, $capability) = local_adminsettings_access();
+    if (has_capability('local/adminsettings:nobody', context_system::instance())) {
+        $hasconfig = true;
+        $hassiteconfig = true;
+    }
+    if (has_capability('moodle/site:config', context_system::instance())) {
+        $hasconfig = false;
+        $hassiteconfig = true;
+    }
 } else {
     // Standard Moodle code
-    $hasconfig = $hassiteconfig = has_capability('moodle/site:config', context_system::instance());
+    if ($hassiteconfig) {
+        $hasconfig = true;
+    }
 }
 
 // if ($hassiteconfig) {
