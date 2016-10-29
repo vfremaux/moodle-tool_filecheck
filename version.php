@@ -17,20 +17,21 @@
 /**
  * Version details.
  *
- * @package    tool_yearlyinit
- * @copyright  2013 Valery Fremaux 
- * @author     Valery Fremaux
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     tool_filecheck
+ * @category    tool
+ * @copyright   2014 Valery Fremaux
+ * @author      Valery Fremaux
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version  = 2014102200;
-$plugin->requires  = 2015050500;        // Requires this Moodle version.
+$plugin->requires  = 2015111100;        // Requires this Moodle version.
 $plugin->component = 'tool_filecheck';  // Full name of the plugin (used for diagnostics).
 $plugin->cron      = 5;
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '2.9.0 (Build 2014102200)';
+$plugin->maturity = MATURITY_RC;
+$plugin->release = '3.0.0 (Build 2014102200)';
 
-// Non Moodle atributes.
-$plugin->codeincrement = '2.9.0003';
+// Non moodle attributes.
+$plugin->codeincrement = '3.0.0000';
