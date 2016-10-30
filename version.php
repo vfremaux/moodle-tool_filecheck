@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Integrity checker
+ * Version details.
  *
  * @package     tool_filecheck
  * @category    tool
@@ -27,8 +27,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version  = 2014102200;
-$plugin->requires  = 2014050800;        // Requires this Moodle version
-$plugin->component = 'tool_filecheck';  // Full name of the plugin (used for diagnostics)
+$plugin->requires  = 2014050800;        // Requires this Moodle version.
+$plugin->component = 'tool_filecheck';  // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_BETA;
 $plugin->release = '2.7.0 (Build 2014102200)';
 

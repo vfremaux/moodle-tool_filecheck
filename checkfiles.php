@@ -57,7 +57,9 @@ if ($confirm) {
         echo '<div class="checkfiles-report">';
         echo '<pre>';
         foreach ($failures as $f) {
-            mtrace($f->id.' '.$f->component.'$'.$f->filearea.' '.$f->filepath.'/'.$f->filename.' '.get_string('expectedat', 'tool_filecheck').":\n".$f->physicalfilepath);
+            $message = $f->id.' '.$f->component.'$'.$f->filearea.' '.$f->filepath.'/'.$f->filename;
+            $message .= ' '.get_string('expectedat', 'tool_filecheck').":\n".$f->physicalfilepath;
+            mtrace($message);
             if ($cleanup) {
                 $DB->delete_records('files', array('id' => $f->id));
                 mtrace('File record removed');
@@ -69,9 +71,11 @@ if ($confirm) {
     }
 }
 
-echo $OUTPUT->single_button(new moodle_url('/admin/tool/filecheck/checkfiles.php', array('confirm' => true)), get_string('confirm'));
+$buttonurl = new moodle_url('/admin/tool/filecheck/checkfiles.php', array('confirm' => true));
+echo $OUTPUT->single_button($buttonurl, get_string('confirm'));
 if ($confirm) {
-    echo $OUTPUT->single_button(new moodle_url('/admin/tool/filecheck/checkfiles.php', array('confirm' => true, 'cleanup' => true)), get_string('cleanup', 'tool_filecheck'));
+    $buttonurl = new moodle_url('/admin/tool/filecheck/checkfiles.php', array('confirm' => true, 'cleanup' => true));
+    echo $OUTPUT->single_button($buttonurl, get_string('cleanup', 'tool_filecheck'));
 }
 
 echo $OUTPUT->footer();
