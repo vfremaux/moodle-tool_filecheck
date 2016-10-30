@@ -32,5 +32,5 @@ $plugin->component = 'tool_filecheck';  // Full name of the plugin (used for dia
 $plugin->maturity = MATURITY_BETA;
 $plugin->release = '2.8.0 (Build 2014102200)';
 
-// Non Moodle attributes.
+// Non moodle attributes.
 $plugin->codeincrement = '2.8.0003';
