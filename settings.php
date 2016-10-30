@@ -25,27 +25,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$hasconfig = false;
-$hassiteconfig = false;
+// Settings default init.
 if (is_dir($CFG->dirroot.'/local/adminsettings')) {
-    // Integration driven code 
-    if (has_capability('local/adminsettings:nobody', context_system::instance())) {
-        $hasconfig = true;
-        $hassiteconfig = true;
-    }
-    if (has_capability('moodle/site:config', context_system::instance())) {
-        $hasconfig = false;
-        $hassiteconfig = true;
-    }
+    // Integration driven code.
+    require_once($CFG->dirroot.'/local/adminsettings/lib.php');
+    list($hasconfig, $hassiteconfig, $capability) = local_adminsettings_access();
 } else {
-    // Standard Moodle code
-    if ($hassiteconfig) {
-        $hasconfig = true;
-    }
+    // Standard Moodle code.
+    $hasconfig = $hassiteconfig = has_capability('moodle/site:config', context_system::instance());
 }
 
-// if ($hassiteconfig) {
 if ($hasconfig) {
-    //--- general settings -----------------------------------------------------------------------------------
-    $ADMIN->add('server', new admin_externalpage('toolcheckfiles', get_string('pluginname', 'tool_filecheck'), new moodle_url("/admin/tool/filecheck/checkfiles.php")));
+    // General settings.
+    $label = get_string('pluginname', 'tool_filecheck');
+    $pageurl = new moodle_url("/admin/tool/filecheck/checkfiles.php");
+    $ADMIN->add('server', new admin_externalpage('toolcheckfiles', $label, $pageurl));
 }
