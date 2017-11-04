@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die;
 function checkfiles_all_files() {
     global $DB, $CFG;
 
-    $allfiles = $DB->get_records('files');
+    $allfiles = $DB->get_recordset('files');
 
     $fs = get_file_storage();
 
@@ -53,6 +53,7 @@ function checkfiles_all_files() {
                 $good[$f->id] = $f;
             }
         }
+        $allfiles->close();
     }
 
     return array(count($good), $failures);
