@@ -46,7 +46,6 @@ $cleanup = optional_param('cleanup', 0, PARAM_BOOL);
 echo $OUTPUT->heading(get_string('checkfiles', 'tool_filecheck'));
 
 if ($confirm) {
-    @raise_memory_limit(MEMORY_EXTRA);
     $results = checkfiles_all_files();
     $goodcount = $results[0];
     $failures = $results[1];
@@ -58,112 +57,9 @@ if ($confirm) {
         echo '<div class="checkfiles-report">';
         echo '<pre>';
         foreach ($failures as $f) {
-            if ($f->component == 'user' && $f->filearea == 'draft') {
-                continue;
-            }
-            if ($f->component == 'core' && $f->filearea == 'preview') {
-                continue;
-            }
-            echo "Moodle file: ".$f->id.' '.$f->contextid.'/'.$f->component.'$'.$f->filearea."\n";
-            $context = context_helper::instance_by_id($f->contextid);
-            switch ($context->contextlevel) {
-                case CONTEXT_SYSTEM: {
-                    $cname = "system";
-                    $resinfo = array('fullname' => '', 'shortname' => '', 'courseid' => 0);
-                    break;
-                }
-
-                case CONTEXT_COURSECAT: {
-                    $cname = "coursecat";
-                    $sql = "
-                        SELECT
-                            cc.name shortname,
-                            cc1.name as fullname,
-                            cc.id as courseid
-                        FROM
-                            {course_categories} cc
-                        LEFT JOIN
-                            {course_categories} cc1
-                        ON
-                            cc1.id = cc.parent
-                        WHERE
-                            cc.id = ?
-                    ";
-                    $resinfo = $DB->get_record_sql($sql, array($context->instanceid));
-                    break;
-                }
-
-                case CONTEXT_COURSE: {
-                    $cname = "course";
-                    $sql = "
-                        SELECT
-                            shortname,
-                            fullname,
-                            c.id as courseid
-                        FROM
-                            {course} c
-                        WHERE
-                            c.id = ?
-                    ";
-                    $resinfo = $DB->get_record_sql($sql, array($context->instanceid));
-                    break;
-                }
-
-                case CONTEXT_MODULE: {
-                    $cname = "module";
-                    $sql = "
-                        SELECT
-                            m.name as restype,
-                            cm.id as modid,
-                            shortname,
-                            fullname,
-                            c.id as courseid
-                        FROM
-                            {course_modules} cm,
-                            {course} c,
-                            {modules} m
-                        WHERE
-                            m.id = cm.module AND
-                            c.id = cm.course AND
-                            cm.id = ?
-                    ";
-                    $resinfo = $DB->get_record_sql($sql, array($context->instanceid));
-                    $resinfo->url = $CFG->wwwroot.'/mod/'.$resinfo->restype.'/view.php?id='.$resinfo->modid;
-                    break;
-                }
-
-                case CONTEXT_BLOCK: {
-                    $cname = "block";
-                    $sql = "
-                        SELECT
-                            bi.blockname as restype,
-                            shortname,
-                            fullname,
-                            c.id as courseid
-                        FROM
-                            {block_instances} bi,
-                            {context} ctx,
-                            {course} c
-                        WHERE
-                            bi.parentcontextid = ctx.id AND
-                            c.id = ctx.instanceid AND
-                            ctx.contextlevel = 50 AND
-                            bi.id = ?
-                    ";
-                    $resinfo = $DB->get_record_sql($sql, array($context->instanceid));
-                    break;
-                }
-
-                case CONTEXT_USER: {
-                    $cname = "user";
-                    break;
-                }
-            }
-            echo "Moodle context: ".$cname."\n";
-            echo "Moodle course: ".@$resinfo->shortname.' ['.@$resinfo->courseid.']'."\n";
-            echo "Moodle mod info: ".@$resinfo->restype.' '.@$resinfo->url."\n";
-            echo "Resource file: ".$f->filepath.'/'.$f->filename."\n";
-            echo "Storage: ".str_replace($CFG->dataroot, '', $f->physicalfilepath)."\n\n";
+            $message = $f->id.' '.$f->component.'$'.$f->filearea.' '.$f->filepath.'/'.$f->filename;
+            $message .= ' '.get_string('expectedat', 'tool_filecheck').":\n".$f->physicalfilepath;
+            mtrace($message);
             if ($cleanup) {
                 $DB->delete_records('files', array('id' => $f->id));
                 mtrace('File record removed');
