@@ -23,6 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Privacy.
+$string['privacy:metadata'] = 'The Filecheck tool does not directly store any personal data about any user.';
+
 $string['pluginname'] = 'Moodle file checker';
 $string['checkfiles'] = 'Check all files';
 $string['goodfiles'] = 'Good files';
