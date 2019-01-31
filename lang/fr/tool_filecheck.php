@@ -23,6 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Privacy.
+$string['privacy:metadata'] = 'Le composant local Vérification de Fichier ne détient directement aucune donnée relative aux utilisateurs.';
+
 $string['pluginname'] = 'Vérification d\'intégrité du stockage de fichiers';
 $string['checkfiles'] = 'Vérifier les fichiers';
 $string['goodfiles'] = 'Fichiers corrects ';
