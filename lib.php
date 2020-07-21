@@ -25,20 +25,75 @@ defined('MOODLE_INTERNAL') || die;
 /**
  * Checks inexistant files (missing)
  */
-function checkfiles_all_files() {
+function checkfiles_all_files($from = 0) {
     global $DB, $CFG;
 
-    $allfiles = $DB->get_recordset('files');
+    $fromdate = optional_param('fromdate', 0, PARAM_INT);
+    $plugins = optional_param('plugins', '', PARAM_TEXT);
+    $limit = optional_param('limit', 20000, PARAM_INT);
+
+    $params = [];
+    $selects = [];
+    $overselects = [];
+    $overparams = [];
+    $inclcomponents = [];
+
+    if ($fromdate) {
+        $selects[] = ' timecreated < ? ';
+        $params = [time() - $fromdate * DAYSECS * 30];
+    }
+
+    if ($plugins) {
+        $pluginlist = explode(',', $plugins);
+        foreach ($pluginlist as $plugin) {
+            if (strpos($plugin, '^') === false) {
+                $inclcomponents[] = ' component = ? ';
+                $params[] = $plugin;
+                $overinclcomponents[] = ' component = ? ';
+                $overparams[] = $plugin;
+            } else {
+                $selects[] = ' component <> ? ';
+                $plugin = str_replace('^', '', $plugin);
+                $params[] = $plugin;
+                $overselects[] = ' component = ? ';
+                $overparams[] = $plugin;
+            }
+        }
+    }
+    if (count($inclcomponents) > 1) {
+        // Odd behaviour of implode.
+        $ored = implode(' OR ', $înclcomponents);
+        $selects[] = ' ('.$ored.') ';
+    } else if (count($inclcomponents) == 1) {
+        $selects[] = $inclcomponents[0];
+    }
+    $select = implode(' AND ', $selects);
+
+    echo "Resulting select: $select from: $from limit: $limit ";
+
+    $allfiles = $DB->get_recordset_select('files', $select, $params, 'id', '*', $from, $limit);
 
     $fs = get_file_storage();
 
     $failures = array();
     $good = array();
+    $directories = 0;
+    $firstindex = 0;
+    $lastindex = 0;
+    $overfiles = 0;
 
     if ($allfiles) {
         foreach ($allfiles as $f) {
             $stored = new stored_file($fs, $f, $CFG->dataroot.'/filedir');
+
+            if ($firstindex == 0) {
+                $firstindex = $stored->get_id();
+            }
+
+            $lastindex = $stored->get_id();
+
             if ($stored->is_directory()) {
+                $directories++;
                 continue;
             }
 
@@ -53,8 +108,36 @@ function checkfiles_all_files() {
                 $good[$f->id] = $f;
             }
         }
+
+        $overselects[] = ' id > ? ';
+        $overparams[] = $lastindex;
+        $overselects[] = '(filename IS NOT NULL AND filename <> ".")';
+        if (!empty($înclovercomponents)) {
+            $overselects[] = ' ('.implode(' OR ', $înclovercomponents).') ';
+        }
+
+        $overselect = implode(' AND ', $overselects);
+        $overfiles = $DB->count_records_select('files', $overselect, $overparams);
+
         $allfiles->close();
     }
 
-    return array(count($good), $failures);
+    return array(count($good), $failures, $directories, $firstindex, $lastindex, $overfiles);
+}
+
+function filecheck_init_obj($registers) {
+
+    $totalizer = new StdClass();
+
+    foreach ($registers as $reg) {
+        $totalizer->$reg = 0;
+    }
+
+    return $totalizer;
+}
+
+function filecheck_add_obj(&$toobject, $totalizer) {
+    foreach ($totalizer as $reg => $value) {
+        $toobject->$reg = $value;
+    }
 }
