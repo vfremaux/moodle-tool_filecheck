@@ -23,9 +23,48 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Moodle file checker';
+// Privacy.
+$string['privacy:metadata'] = 'The Filecheck tool does not directly store any personal data about any user.';
+
+$string['agregateby'] = 'Agregate by';
+$string['appfiles'] = 'Applications';
+$string['bigfiles'] =  'Big files (size)';
+$string['bigfilescnt'] =  'Big files (count)';
+$string['byinstance'] = 'By plugin instance';
+$string['bymoduletype'] = 'By plugin type';
 $string['checkfiles'] = 'Check all files';
-$string['goodfiles'] = 'Good files';
-$string['missingfiles'] = 'Missing files';
-$string['expectedat'] = 'Expected at';
 $string['cleanup'] = 'Cleanup file records';
+$string['component'] = 'Component';
+$string['contextid'] = 'ContextID';
+$string['directories'] = 'Directories';
+$string['expectedat'] = 'Expected at';
+$string['files'] = 'Files (all)';
+$string['filetools'] = 'File tools';
+$string['filetypes'] = 'Types of files';
+$string['firstindex'] = 'First index';
+$string['fixvsdraftfiles'] = 'Drafts';
+$string['goodfiles'] = 'Good files';
+$string['imagefiles'] = 'Images';
+$string['instanceid'] = 'Instance';
+$string['integrity'] = 'Integrity check';
+$string['lastindex'] = 'Last index';
+$string['missingfiles'] = 'Missing files';
+$string['overfiles'] = 'Next files (higher id)';
+$string['pdffiles'] = 'Pdf';
+$string['pluginname'] = 'Moodle file checker';
+$string['totalfiles'] = 'All files';
+$string['videofiles'] = 'Videos';
+
+$string['additionalparams_help'] = 'Additional param on check request : <br/>
+<ul>
+    <li><b>from</b> (opt) : Start record id</li>
+    <li><b>fromdate</b> (opt) : Month backtracking (1, 2, or n month from the current date)</li>
+    <li><b>plugins</b> (opt) : Component list (coma separated, negative test with "^" prefix per plugin)</li>
+    <li><b>limit</b> (opt) : Query result limit size (defaults to 20000, use 0 for no limit, but take care of the possible load impact)</li>
+</ul>
+
+<p>toujours ajouter confirm=1 à l\'URL</p>
+<p><b>Examples :</b></p>
+<p><pre>/admin/tool/filecheck/checkfiles.php?from=0&plugins=mod_label,mod_customlabel&limit=0&confirm=1</pre></p>
+<p><pre>/admin/tool/filecheck/checkfiles.php?from=10000&plugins=^assignfeedback_editpdf&limit=50000&confirm=1</pre></p>
+';

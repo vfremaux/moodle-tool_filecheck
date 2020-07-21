@@ -25,17 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Settings default init.
-if (is_dir($CFG->dirroot.'/local/adminsettings')) {
-    // Integration driven code.
-    require_once($CFG->dirroot.'/local/adminsettings/lib.php');
-    list($hasconfig, $hassiteconfig, $capability) = local_adminsettings_access();
-} else {
-    // Standard Moodle code.
-    $hasconfig = $hassiteconfig = has_capability('moodle/site:config', context_system::instance());
-}
-
-if ($hasconfig) {
+if (!empty($hasconfig)) {
     // General settings.
     $label = get_string('pluginname', 'tool_filecheck');
     $pageurl = new moodle_url("/admin/tool/filecheck/checkfiles.php");
