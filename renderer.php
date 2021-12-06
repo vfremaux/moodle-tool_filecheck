@@ -92,6 +92,10 @@ class tool_filecheck_renderer extends plugin_renderer_base {
         $taburl = new moodle_url('/admin/tool/filecheck/index.php');
         $rows[0][] = new tabobject('index', $taburl, $tabname);
 
+        $tabname = get_string('orphans', 'tool_filecheck');
+        $taburl = new moodle_url('/admin/tool/filecheck/orphans.php');
+        $rows[0][] = new tabobject('orphans', $taburl, $tabname);
+
         $tabname = get_string('integrity', 'tool_filecheck');
         $taburl = new moodle_url('/admin/tool/filecheck/checkfiles.php');
         $rows[0][] = new tabobject('integrity', $taburl, $tabname);
@@ -113,5 +117,16 @@ class tool_filecheck_renderer extends plugin_renderer_base {
         $str .= '</span>';
 
         return $str;
+    }
+
+    public function orphan_stats($stats) {
+           $table = new html_table();
+           $table->head = ['', get_string('orphans', 'tool_filecheck')];
+           $table->width = '100%';
+           $table->size = ['30%', '70%'];
+           $table->data[] = [get_string('count', 'tool_filecheck'), $stats['count']];
+           $table->data[] = [get_string('orphansize', 'tool_filecheck'), $this->format_size($stats['bytesize']).' '.$this->size_bar($stats['bytesize'])];
+
+            return html_writer::table($table);
     }
 }

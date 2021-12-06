@@ -44,14 +44,14 @@ echo $renderer->agregation_select();
 
 $sql = "
     SELECT
-        CONCAT(ctx.id, '-', f.component, '-', ctx.instanceid) as pkey,
+        CONCAT(ctx.id, '-', f.component, '-', ctx.instanceid, '-', f.filearea) as pkey,
         ctx.id as ctxid,
         ctx.contextlevel as contextlevel,
         ctx.instanceid as instanceid,
         f.component as component,
-        SUM( CASE WHEN f.filearea != 'draft' THEN 1 ELSE 0 END) as storagecount,
-        SUM( CASE WHEN f.filearea != 'draft' THEN f.filesize ELSE 0 END) as storage,
-        SUM( CASE WHEN f.filearea = 'draft' THEN f.filesize ELSE 0 END) as draftstorage,
+        f.filearea as filearea,
+        SUM(1) as storagecount,
+        SUM(f.filesize) as storage,
         SUM( CASE WHEN f.mimetype LIKE 'video%' THEN f.filesize ELSE 0 END) as videostorage,
         SUM( CASE WHEN f.mimetype LIKE 'image%' THEN f.filesize ELSE 0 END) as imagestorage,
         SUM( CASE WHEN f.mimetype LIKE 'x-application%' THEN f.filesize ELSE 0 END) as appstorage,
@@ -65,7 +65,7 @@ $sql = "
         f.contextid = ctx.id AND
         f.filesize > 0
     GROUP BY
-        ctx.id, f.component, ctx.instanceid
+        ctx.id, f.component, ctx.instanceid, f.filearea
 ";
 
 $filestats = $DB->get_records_sql($sql);
@@ -82,10 +82,23 @@ $bycomponents = new StdClass;
 $bycomponents->detail = [];
 $bycomponents->totals = [];
 
-$counterfields = ['storagecount', 'storage', 'draftstorage', 'videostorage', 'imagestorage', 'appstorage', 'pdfstorage', 'bigfiles', 'bigfilesstorage'];
+// A counter object gives global counters (all files) and "by nature" partial results.
+$counterfields = ['storagecount', 'storage', 'videostorage', 'imagestorage', 'appstorage', 'pdfstorage', 'bigfiles', 'bigfilesstorage'];
+
+// Overal totalizer that sums everything.
 $totalizer = filecheck_init_obj($counterfields);
+
+// By course totalizers that sums one measurement per course.
 $coursetotalizers = [];
+
+// By component totalizers that sum one measurement per component type (all fileareas).
 $componenttotalizers = [];
+
+// One single record that sums all draft files
+$drafttotalizer = filecheck_init_obj($counterfields);
+
+// One single record that sums all other user files (persistant) that are NOT draft.
+$usertotalizers = [];
 
 // Preaggregate by some categories.
 if (!empty($filestats)) {
@@ -94,21 +107,39 @@ if (!empty($filestats)) {
     foreach ($filestats as $fs) {
 
         if ($fs->contextlevel == CONTEXT_SYSTEM) {
+            // All systeme related files are set in course SITEID.
             $cid = SITEID;
         }
 
         if ($fs->contextlevel == CONTEXT_MODULE) {
+            // If a course module scope, find course id.
             $cid = $DB->get_field('course_modules', 'course', ['id' => $fs->instanceid]);
         }
 
         if ($fs->contextlevel == CONTEXT_COURSE) {
+            // Course level files. Trivial mapping.
             $cid = $fs->instanceid;
         }
 
         if ($fs->contextlevel == CONTEXT_BLOCK) {
+            // Get the surrounding course context as course reference.
             $parentcontextid = $DB->get_field('block_instances', 'parentcontextid', ['id' => $fs->instanceid]);
             $cid = $DB->get_field('context', 'instanceid', ['id' => $parentcontextid]);
         }
+
+        if ($fs->contextlevel == CONTEXT_USER) {
+            if ($fs->filearea == 'draft') {
+                filecheck_add_obj($drafttotalizer, $fs);
+            } else {
+                if (array_key_exists($cid, $usertotalizers)) {
+                    filecheck_add_obj($usertotalizers[$cid], $fs);
+                } else {
+                    $usertotalizers[$cid] = filecheck_init_obj($counterfields);
+                }
+            }
+            continue;
+        }
+
         $bycourses->detail[$cid][$fs->ctxid] = $fs;
 
         if (array_key_exists($cid, $coursetotalizers)) {
@@ -138,7 +169,63 @@ if (!empty($filestats)) {
     }
 }
 
+// Define this once.
+$totalstr = get_string('totalfiles', 'tool_filecheck');
+$videostr = get_string('videofiles', 'tool_filecheck');
+$imagestr = get_string('imagefiles', 'tool_filecheck');
+$appstr = get_string('appfiles', 'tool_filecheck');
+$pdfstr = get_string('pdffiles', 'tool_filecheck');
+$bigstr = get_string('bigfiles', 'tool_filecheck');
+
 if (!empty($filestats)) {
+
+    // Overall stats.
+    $table = new html_table();
+    $table->head = ['Q', $totalstr, $videostr, $imagestr, $appstr, $pdfstr, '', $bigstr];
+
+    $row = [];
+    $row[] = $totalizer->storagecount;
+    $d = $totalizer->storage;
+    $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
+    $d = $totalizer->videostorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $d = $totalizer->imagestorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $d = $totalizer->appstorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $d = $totalizer->pdfstorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $row[] = $totalizer->bigfiles;
+    $d = $totalizer->bigfilesstorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $table->data[] = $row;
+
+    echo $OUTPUT->heading(get_string('overall', 'tool_filecheck'));
+    echo html_writer::table($table);
+
+    // Draft stats.
+    $table = new html_table();
+    $table->head = ['Q', $totalstr, $videostr, $imagestr, $appstr, $pdfstr, '', $bigstr];
+
+    $row = [];
+    $row[] = $totalizer->storagecount;
+    $d = $drafttotalizer->storage;
+    $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
+    $d = $drafttotalizer->videostorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $d = $drafttotalizer->imagestorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $d = $drafttotalizer->appstorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $d = $drafttotalizer->pdfstorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $row[] = $drafttotalizer->bigfiles;
+    $d = $drafttotalizer->bigfilesstorage;
+    $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
+    $table->data[] = $row;
+
+    echo $OUTPUT->heading(get_string('drafts', 'tool_filecheck'));
+    echo html_writer::table($table);
 
     // By course table.
     $table = new html_table();
@@ -147,17 +234,9 @@ if (!empty($filestats)) {
     $componentstr = get_string('component', 'tool_filecheck');
     $coursestr = get_string('course');
 
-    $totalstr = get_string('totalfiles', 'tool_filecheck');
-    $draftstr = get_string('fixvsdraftfiles', 'tool_filecheck');
-    $videostr = get_string('videofiles', 'tool_filecheck');
-    $imagestr = get_string('imagefiles', 'tool_filecheck');
-    $appstr = get_string('appfiles', 'tool_filecheck');
-    $pdfstr = get_string('pdffiles', 'tool_filecheck');
-    $bigstr = get_string('bigfiles', 'tool_filecheck');
-
     if ($agregator == 'byinstance') {
 
-        $table->head = [$coursestr, $contextidstr, $componentstr, $instanceidstr, '', $totalstr, $draftstr, $videostr, $imagestr, $appstr, $pdfstr, '', $bigstr];
+        $table->head = [$coursestr, $contextidstr, $componentstr, $instanceidstr, 'Q', $totalstr, $videostr, $imagestr, $appstr, $pdfstr, '', $bigstr];
 
         foreach ($bycourses->detail as $cid => $coursefiles) {
 
@@ -194,8 +273,6 @@ if (!empty($filestats)) {
                 $row[] = $entry->storagecount;
                 $d = $entry->storage;
                 $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
-                $d = $entry->draftstorage;
-                $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
                 $d = $entry->videostorage;
                 $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
                 $d = $entry->imagestorage;
@@ -212,7 +289,7 @@ if (!empty($filestats)) {
         }
     } else {
         // By plugin type (component)
-        $table->head = [$coursestr, $componentstr, '', $totalstr, $draftstr, $videostr, $imagestr, $appstr, $pdfstr, '', $bigstr];
+        $table->head = [$coursestr, $componentstr, 'Q', $totalstr, $videostr, $imagestr, $appstr, $pdfstr, '', $bigstr];
 
         foreach ($bycourses->components as $cid => $typestats) {
 
@@ -221,8 +298,6 @@ if (!empty($filestats)) {
             $row[] = '';
             $row[] = $coursetotalizers[$cid]->storagecount;
             $d = $coursetotalizers[$cid]->storage;
-            $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
-            $d = $coursetotalizers[$cid]->draftstorage;
             $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
             $d = $coursetotalizers[$cid]->videostorage;
             $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
@@ -244,8 +319,6 @@ if (!empty($filestats)) {
 
                 $row[] = $entry->storagecount;
                 $d = $entry->storage;
-                $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
-                $d = $entry->draftstorage;
                 $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
                 $d = $entry->videostorage;
                 $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
@@ -273,8 +346,6 @@ if (!empty($filestats)) {
     $row[] = $totalizer->storagecount;
     $d = $totalizer->storage;
     $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
-    $d = $totalizer->draftstorage;
-    $row[] = $renderer->format_size($d).' / '.$renderer->size_bar($d);
     $d = $totalizer->videostorage;
     $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
     $d = $totalizer->imagestorage;
@@ -288,6 +359,7 @@ if (!empty($filestats)) {
     $row[] = $renderer->format_size($d).' '.$renderer->size_bar($d);
     $table->data[] = $row;
 
+    echo $OUTPUT->heading(get_string('detail', 'tool_filecheck'));
     echo html_writer::table($table);
 }
 

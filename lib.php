@@ -138,6 +138,8 @@ function filecheck_init_obj($registers) {
 
 function filecheck_add_obj(&$toobject, $totalizer) {
     foreach ($totalizer as $reg => $value) {
-        $toobject->$reg = $value;
+        if (isset($toobject->$reg)) {
+            $toobject->$reg += $value;
+        }
     }
 }

@@ -25,9 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if (!empty($hasconfig)) {
-    // General settings.
-    $label = get_string('pluginname', 'tool_filecheck');
-    $pageurl = new moodle_url("/admin/tool/filecheck/checkfiles.php");
-    $ADMIN->add('server', new admin_externalpage('toolcheckfiles', $label, $pageurl));
-}
+// General settings.
+$label = get_string('pluginname', 'tool_filecheck');
+$pageurl = new moodle_url("/admin/tool/filecheck/checkfiles.php");
+$ADMIN->add('server', new admin_externalpage('toolcheckfiles', $label, $pageurl));

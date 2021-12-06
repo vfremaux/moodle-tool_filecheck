@@ -1,4 +1,3 @@
-<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,23 +13,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version details.
- *
- * @package    tool_filecheck
- * @copyright  2013 Valery Fremaux
- * @author     Valery Fremaux
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// jshint unused: true, undef:true
 
-defined('MOODLE_INTERNAL') || die();
+define(['jquery', 'core/log', 'core/config'], function($, log, cfg) {
 
-$plugin->version  = 2021120600;
-$plugin->requires  = 2020060900;        // Requires this Moodle version.
-$plugin->component = 'tool_filecheck';  // Full name of the plugin (used for diagnostics).
-$plugin->cron      = 5;
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.9.0 (Build 2021120600)';
+    var filecheckorphans = {
 
-// Non moodle attributes.
-$plugin->codeincrement = '3.9.0001';
+        init: function() {
+            $('#id_orphans_select_all_handle').bind('click', this.selectall);
+            $('#id_orphans_unselect_all_handle').bind('click', this.unselectall);
+            
+            log.outut('AMD tool filecheck initialized');
+        },
+
+        selectall: function() {
+            $('.fitem_fcheckbox input').prop('checked', true);
+        },
+
+        unselectall: function() {
+            $('.fitem_fcheckbox input').prop('checked', false);
+        }
+
+    };
+
+    return filecheckorphans;
+});
+

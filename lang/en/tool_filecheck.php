@@ -36,9 +36,16 @@ $string['checkfiles'] = 'Check all files';
 $string['cleanup'] = 'Cleanup file records';
 $string['component'] = 'Component';
 $string['contextid'] = 'ContextID';
+$string['count'] = 'Number of files';
+$string['detail'] = 'Detail';
 $string['directories'] = 'Directories';
+$string['directory'] = 'Directory';
+$string['drafts'] = 'Drafts';
 $string['expectedat'] = 'Expected at';
+$string['extension'] = 'Extension';
+$string['filename'] = 'File name';
 $string['files'] = 'Files (all)';
+$string['filesize'] = 'File size';
 $string['filetools'] = 'File tools';
 $string['filetypes'] = 'Types of files';
 $string['firstindex'] = 'First index';
@@ -49,9 +56,15 @@ $string['instanceid'] = 'Instance';
 $string['integrity'] = 'Integrity check';
 $string['lastindex'] = 'Last index';
 $string['missingfiles'] = 'Missing files';
+$string['nofiles'] = 'No orphan files';
+$string['orphans'] = 'Orphan files';
+$string['orphansize'] = 'Size of orphan physical files';
+$string['overall'] = 'Overall';
 $string['overfiles'] = 'Next files (higher id)';
 $string['pdffiles'] = 'Pdf';
 $string['pluginname'] = 'Moodle file checker';
+$string['selectall'] = 'Select all';
+$string['unselectall'] = 'Unselect all';
 $string['totalfiles'] = 'All files';
 $string['videofiles'] = 'Videos';
 
@@ -63,7 +76,7 @@ $string['additionalparams_help'] = 'Additional param on check request : <br/>
     <li><b>limit</b> (opt) : Query result limit size (defaults to 20000, use 0 for no limit, but take care of the possible load impact)</li>
 </ul>
 
-<p>toujours ajouter confirm=1 à l\'URL</p>
+<p>Add always confirm=1 to the URL</p>
 <p><b>Examples :</b></p>
 <p><pre>/admin/tool/filecheck/checkfiles.php?from=0&plugins=mod_label,mod_customlabel&limit=0&confirm=1</pre></p>
 <p><pre>/admin/tool/filecheck/checkfiles.php?from=10000&plugins=^assignfeedback_editpdf&limit=50000&confirm=1</pre></p>
