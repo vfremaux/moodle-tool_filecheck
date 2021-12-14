@@ -1,0 +1,26 @@
+.filecheck-tera {
+    background-color:#FF2828;
+}
+
+.filecheck-giga {
+    background-color:#FEA429;
+}
+
+.filecheck-mega {
+    background-color:#F0DE00;
+}
+
+.filecheck-kilo {
+    background-color:#00A8F0;
+}
+
+.filecheck-size-bar {
+    display:inline-block;
+    height:4px;
+    width:15px;
+}
+
+.filecheck-null-value {
+    -moz-opacity:0.5;
+    opacity:0.5;
+}

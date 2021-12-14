@@ -26,9 +26,65 @@
 // Privacy.
 $string['privacy:metadata'] = 'The Filecheck tool does not directly store any personal data about any user.';
 
-$string['pluginname'] = 'Moodle file checker';
+$string['agregateby'] = 'Agregate by';
+$string['appfiles'] = 'Applications';
+$string['bigfiles'] =  'Big files (size)';
+$string['bigfilescnt'] =  'Big files (count)';
+$string['byinstance'] = 'By plugin instance';
+$string['bymoduletype'] = 'By plugin type';
+$string['bymoduletypebycourse'] = 'By plugin type each course';
 $string['checkfiles'] = 'Check all files';
-$string['goodfiles'] = 'Good files';
-$string['missingfiles'] = 'Missing files';
-$string['expectedat'] = 'Expected at';
+$string['confirm_delete'] = 'Confirm orphan files deletion';
 $string['cleanup'] = 'Cleanup file records';
+$string['component'] = 'Component';
+$string['contextid'] = 'ContextID';
+$string['count'] = 'Number of files';
+$string['configignoreautomatedbackupfolder'] = 'Orphans: Ignore files in automated backup folder';
+$string['configignoreautomatedbackupfolder_desc'] = 'Check this if you have the automated backup system set to put files in a specified directory and wish to exclude them from this report';
+$string['configshowfileinfo'] = 'Orphans: Show file extensions in file scan?';
+$string['configshowfileinfo_desc'] = 'This will slow down the scan and may cause a timeout';
+$string['detail'] = 'Detail';
+$string['deleted'] = 'All required files deleted.';
+$string['directories'] = 'Directories';
+$string['directory'] = 'Directory';
+$string['drafts'] = 'Drafts';
+$string['expectedat'] = 'Expected at';
+$string['extension'] = 'Extension';
+$string['filename'] = 'File name';
+$string['files'] = 'Files (all)';
+$string['filesize'] = 'File size';
+$string['filetools'] = 'File tools';
+$string['filetypes'] = 'Types of files';
+$string['firstindex'] = 'First index';
+$string['fixvsdraftfiles'] = 'Drafts';
+$string['goodfiles'] = 'Good files';
+$string['imagefiles'] = 'Images';
+$string['instanceid'] = 'Instance';
+$string['integrity'] = 'Integrity check';
+$string['lastindex'] = 'Last index';
+$string['missingfiles'] = 'Missing files';
+$string['nofiles'] = 'No orphan files';
+$string['orphans'] = 'Orphan files';
+$string['orphansize'] = 'Size of orphan physical files';
+$string['overall'] = 'Overall';
+$string['overfiles'] = 'Next files (higher id)';
+$string['pdffiles'] = 'Pdf';
+$string['pluginname'] = 'Moodle file checker';
+$string['selectall'] = 'Select all';
+$string['unselectall'] = 'Unselect all';
+$string['totalfiles'] = 'All files';
+$string['videofiles'] = 'Videos';
+
+$string['additionalparams_help'] = 'Additional param on check request : <br/>
+<ul>
+    <li><b>from</b> (opt) : Start record id</li>
+    <li><b>fromdate</b> (opt) : Month backtracking (1, 2, or n month from the current date)</li>
+    <li><b>plugins</b> (opt) : Component list (coma separated, negative test with "^" prefix per plugin)</li>
+    <li><b>limit</b> (opt) : Query result limit size (defaults to 20000, use 0 for no limit, but take care of the possible load impact)</li>
+</ul>
+
+<p>Add always confirm=1 to the URL</p>
+<p><b>Examples :</b></p>
+<p><pre>/admin/tool/filecheck/checkfiles.php?from=0&plugins=mod_label,mod_customlabel&limit=0&confirm=1</pre></p>
+<p><pre>/admin/tool/filecheck/checkfiles.php?from=10000&plugins=^assignfeedback_editpdf&limit=50000&confirm=1</pre></p>
+';
