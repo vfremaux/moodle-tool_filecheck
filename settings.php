@@ -25,19 +25,24 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Settings default init.
-if (is_dir($CFG->dirroot.'/local/adminsettings')) {
-    // Integration driven code.
-    require_once($CFG->dirroot.'/local/adminsettings/lib.php');
-    list($hasconfig, $hassiteconfig, $capability) = local_adminsettings_access();
-} else {
-    // Standard Moodle code.
-    $hasconfig = $hassiteconfig = has_capability('moodle/site:config', context_system::instance());
-}
+// General settings.
+$label = get_string('pluginname', 'tool_filecheck');
+$pageurl = new moodle_url("/admin/tool/filecheck/checkfiles.php");
+$ADMIN->add('server', new admin_externalpage('toolcheckfiles', $label, $pageurl));
 
-if ($hasconfig) {
-    // General settings.
-    $label = get_string('pluginname', 'tool_filecheck');
-    $pageurl = new moodle_url("/admin/tool/filecheck/checkfiles.php");
-    $ADMIN->add('server', new admin_externalpage('toolcheckfiles', $label, $pageurl));
+if ($hassiteconfig) {
+    $settings = new admin_settingpage('tool_filecheck', get_string('pluginname', 'tool_filecheck'));
+    $ADMIN->add('tools', $settings);
+
+    $key = 'tool_filecheck/showfileinfo';
+    $label = get_string('configshowfileinfo', 'tool_filecheck');
+    $desc = get_string('configshowfileinfo_desc', 'tool_filecheck');
+    $default = 0;
+    $settings->add(new admin_setting_configcheckbox($key, $label, $desc, $default));
+
+    $key = 'tool_filecheck/ignoreautomatedbackupfolder';
+    $label = get_string('configignoreautomatedbackupfolder', 'tool_filecheck');
+    $desc = get_string('configignoreautomatedbackupfolder_desc', 'tool_filecheck');
+    $default = 1;
+    $settings->add(new admin_setting_configcheckbox($key, $label, $desc, $default));
 }
