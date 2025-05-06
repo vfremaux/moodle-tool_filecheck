@@ -45,6 +45,9 @@ echo $OUTPUT->header();
 
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $cleanup = optional_param('cleanup', 0, PARAM_BOOL);
+$fromdate = optional_param('fromdate', 0, PARAM_INT);
+$plugins = optional_param('plugins', '', PARAM_TEXT);
+$limit = optional_param('limit', 20000, PARAM_INT);
 
 echo $OUTPUT->heading(get_string('checkfiles', 'tool_filecheck'));
 
@@ -52,17 +55,25 @@ echo $renderer->tabs('integrity');
 
 if ($confirm) {
     $from = optional_param('from', 0, PARAM_INT);
-    $results = checkfiles_all_files($from);
+
+    // Get all results with limit and plugins filter.
+
+    $results = checkfiles_all_files($from, $fromdate, $plugins, $limit);
     $goodcount = $results[0];
     $failures = $results[1];
     $directories = $results[2];
     $firstindex = $results[3];
     $lastindex = $results[4];
     $overfiles = $results[5];
+    $storedsize = $results[6];
+    $physicalstoredsize = $results[7];
 
     echo get_string('files', 'tool_filecheck').': <span style="color:green">'.($goodcount + count($failures)).'</span><br/><br/>';
     echo get_string('directories', 'tool_filecheck').': <span style="color:green">'.$directories.'</span><br/><br/>';
     echo get_string('goodfiles', 'tool_filecheck').': <span style="color:green">'.$goodcount.'</span><br/><br/>';
+    echo get_string('storedsize', 'tool_filecheck').': <span style="color:green">'.($storedsize).'</span><br/><br/>';
+    $color = ($storedsize == $physicalstoredsize) ? 'green' : 'orange';
+    echo get_string('physicalstoredsize', 'tool_filecheck').': <span style="color:'.$color.'">'.($physicalstoredsize).'</span><br/><br/>';
     echo get_string('firstindex', 'tool_filecheck').': <span style="color:green">'.$firstindex.'</span><br/><br/>';
     echo get_string('lastindex', 'tool_filecheck').': <span style="color:green">'.$lastindex.'</span><br/><br/>';
     echo get_string('overfiles', 'tool_filecheck').': <span style="color:green">'.$overfiles.'</span><br/><br/>';
@@ -79,6 +90,7 @@ if ($confirm) {
             mtrace($message);
             if ($cleanup) {
                 // Fix only if cleanup was asked for.
+                // Cleanup will only affect filtered plugins.
                 $DB->delete_records('files', array('id' => $f->id));
                 mtrace('File record removed');
             }
@@ -89,10 +101,24 @@ if ($confirm) {
     }
 }
 
-$buttonurl = new moodle_url('/admin/tool/filecheck/checkfiles.php', array('confirm' => true));
+$params = [
+    'confirm' => true,
+    'cleanup' => false,
+    'plugins' => $plugins,
+    'fromdate' => $fromdate,
+    'limit' => $limit,
+];
+$buttonurl = new moodle_url('/admin/tool/filecheck/checkfiles.php', $params);
 echo $OUTPUT->single_button($buttonurl, get_string('confirm'));
 if ($confirm) {
-    $buttonurl = new moodle_url('/admin/tool/filecheck/checkfiles.php', array('confirm' => true, 'cleanup' => true));
+    $params = [
+        'confirm' => true,
+        'cleanup' => true,
+        'plugins' => $plugins,
+        'fromdate' => $fromdate,
+        'limit' => $limit,
+    ];
+    $buttonurl = new moodle_url('/admin/tool/filecheck/checkfiles.php', $params);
     echo $OUTPUT->single_button($buttonurl, get_string('cleanup', 'tool_filecheck'));
 }
 
